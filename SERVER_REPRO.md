@@ -44,12 +44,15 @@ hf auth login
 
 ## 4. LoRA Weights
 
-Download the MedSAM3 LoRA weights from the project Hugging Face page and place
-them under an ignored local directory, for example:
+Download the SAM3 base checkpoint and MedSAM3 LoRA weights under ignored local
+directories:
 
 ```bash
-mkdir -p weights/medsam3_v1
-# Put best_lora_weights.pt or the released LoRA weight file here.
+mkdir -p weights/sam3_base weights/medsam3_v1
+# Put the SAM3 base checkpoint here:
+#   weights/sam3_base/sam3.pt
+# Put the released MedSAM3 LoRA file here:
+#   weights/medsam3_v1/best_lora_weights.pt
 ```
 
 This repository intentionally does not track `.pt`, `.pth`, `.ckpt`, or
@@ -62,6 +65,7 @@ Run inference with an explicit LoRA weight path:
 ```bash
 python infer_sam.py \
   --config configs/full_lora_config.yaml \
+  --sam3-checkpoint weights/sam3_base/sam3.pt \
   --weights weights/medsam3_v1/best_lora_weights.pt \
   --image path/to/image.jpg \
   --prompt "skin lesion" \
@@ -75,6 +79,7 @@ For multiple prompts:
 ```bash
 python infer_sam.py \
   --config configs/full_lora_config.yaml \
+  --sam3-checkpoint weights/sam3_base/sam3.pt \
   --weights weights/medsam3_v1/best_lora_weights.pt \
   --image path/to/image.jpg \
   --prompt "skin lesion" "lesion" "abnormal skin region" \
@@ -106,4 +111,3 @@ python train_sam3_lora_native.py --config configs/full_lora_config.yaml
 
 For a 24 GB GPU, start with a light config, `batch_size=1`, mixed precision, and
 gradient accumulation.
-

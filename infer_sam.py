@@ -64,6 +64,7 @@ class SAM3LoRAInference:
         self,
         config_path: str,
         weights_path: Optional[str] = None,
+        sam3_checkpoint: Optional[str] = None,
         resolution: int = 1008,
         detection_threshold: float = 0.5,
         nms_iou_threshold: float = 0.5,
@@ -75,6 +76,7 @@ class SAM3LoRAInference:
         Args:
             config_path: Path to training config YAML
             weights_path: Path to LoRA weights (optional, auto-detected from config)
+            sam3_checkpoint: Path to local SAM3 base checkpoint (optional)
             resolution: Input image resolution (default: 1008)
             detection_threshold: Confidence threshold for detections (default: 0.5)
             nms_iou_threshold: IoU threshold for NMS (default: 0.5)
@@ -110,7 +112,8 @@ class SAM3LoRAInference:
         self.model = build_sam3_image_model(
             device=self.device.type,
             compile=False,
-            load_from_HF=True,
+            checkpoint_path=sam3_checkpoint,
+            load_from_HF=sam3_checkpoint is None,
             bpe_path="sam3/assets/bpe_simple_vocab_16e6.txt.gz",
             eval_mode=True
         )
@@ -455,6 +458,12 @@ def main():
         help="Path to LoRA weights (auto-detected if not provided)"
     )
     parser.add_argument(
+        "--sam3-checkpoint",
+        type=str,
+        default=None,
+        help="Path to local SAM3 base checkpoint. If omitted, downloads facebook/sam3 from Hugging Face."
+    )
+    parser.add_argument(
         "--image",
         type=str,
         required=True,
@@ -509,6 +518,7 @@ def main():
     inferencer = SAM3LoRAInference(
         config_path=args.config,
         weights_path=args.weights,
+        sam3_checkpoint=args.sam3_checkpoint,
         resolution=args.resolution,
         detection_threshold=args.threshold,
         nms_iou_threshold=args.nms_iou
